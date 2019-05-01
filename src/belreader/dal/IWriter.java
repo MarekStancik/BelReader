@@ -13,4 +13,5 @@ import belreader.be.Order;
 public interface IWriter
 {
     void setOrder(Order order);
+    boolean hasConnection();
 }

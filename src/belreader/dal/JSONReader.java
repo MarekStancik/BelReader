@@ -34,11 +34,11 @@ public class JSONReader implements IReader
         this.json = json;
     }
     
-    public static void main(String... args) throws FileNotFoundException
+  /*  public static void main(String... args) throws FileNotFoundException
     {
         JSONReader reader = new JSONReader(new FileInputStream("JSON.txt"));
         reader.getOrders();
-    }
+    }*/
     
     @Override
     public List<Order> getOrders()
@@ -54,10 +54,10 @@ public class JSONReader implements IReader
             JSONObject worker = (JSONObject) itWorkers.next();
             workers.add(new Worker(worker.getString("__type"),worker.getString("Name"),worker.getString("Initials"),worker.getInt("SalaryNumber")));
         } 
-        for(Worker wk: workers)
+      /*  for(Worker wk: workers)
         {
             System.out.println(wk.toString());
-        }
+        }*/ //FOR TESTING
         
         List<Order> orders = new ArrayList<>();
         arr = obj.getJSONArray("ProductionOrders");
@@ -84,8 +84,8 @@ public class JSONReader implements IReader
             orders.add(new Order(customerName,parseDate(deliveryDate),orderNum,taskList));
         }       
         
-        for(Order or: orders)
-            System.out.println(or.toString());
+        /*for(Order or: orders)
+            System.out.println(or.toString());*/ //FOR TESTING
             
         return orders;
     }

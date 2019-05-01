@@ -36,7 +36,7 @@ public class Model
         this.filePath = filePath; 
     }
 
-    private void update()
+    public void update()
     {
         try
         {
@@ -54,5 +54,15 @@ public class Model
         {
             Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public boolean hasNewData()
+    {
+        return true;
+    }
+    
+    public boolean hasConnection()
+    {
+        return writer.hasConnection();
     }
 }

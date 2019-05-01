@@ -21,21 +21,30 @@ import java.util.logging.Logger;
 public class DbConnectionProvider
 {
     private SQLServerDataSource ds;
+    private Properties props;
     
     public DbConnectionProvider(Properties prop)
     {
+        props = prop;
         ds = new SQLServerDataSource();
-        ds.setServerName(prop.getProperty("ServerName"));
-        ds.setPortNumber(Integer.parseInt(prop.getProperty("PortNumber")));
-        ds.setDatabaseName(prop.getProperty("DbName"));
-        ds.setUser(prop.getProperty("UserName"));
-        ds.setPassword(prop.getProperty("Password"));
     }
     
     public Connection getConnection()
     {
         try
         {
+            ds.setServerName(props.getProperty("ServerName"));
+            int pnum = 0;
+            try{
+                pnum = Integer.parseInt(props.getProperty("PortNumber"));
+            }catch(NumberFormatException ex)
+            {
+                pnum = 0;
+            }
+            ds.setPortNumber(pnum);
+            ds.setDatabaseName(props.getProperty("DbName"));
+            ds.setUser(props.getProperty("UserName"));
+            ds.setPassword(props.getProperty("Password"));
             return ds.getConnection();
         } catch (SQLServerException ex)
         {

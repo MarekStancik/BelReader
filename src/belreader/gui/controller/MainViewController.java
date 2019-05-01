@@ -5,18 +5,37 @@
  */
 package belreader.gui.controller;
 
+import belreader.bll.Model;
+import java.awt.AWTException;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.Toolkit;
+import java.awt.TrayIcon;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import javax.imageio.ImageIO;
 
 /**
  * FXML Controller class
@@ -37,7 +56,19 @@ public class MainViewController implements Initializable
     @FXML
     private TextField textUserPassword;
     
-    final String PROP_FILE = "connection.properties";
+    private ScheduledExecutorService executor;
+    private Model model;
+    private TrayIcon trayIcon;
+    private Stage stage;
+    private boolean firstTime;
+    private Properties properties;
+    
+    private final String PROP_FILE = "src/belreader/resources/connection.properties";
+    private final String TRAY_NAME = "BelReader";
+    private final String ERROR_IMAGE_PATH = "src/belreader/resources/belmanRed.jpg";
+    private final String NORMAL_IMAGE_PATH = "src/belreader/resources/belmanBlue.jpg";
+    private final String JSON_PATH = "src/belreader/resources/json.txt";
+    private final String NO_CONNECTION_MSG = "Cannot connect to the database";
 
     /**
      * Initializes the controller class.
@@ -45,16 +76,122 @@ public class MainViewController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-        if(tryLoadFromPropFile())
-        {
-            start();
-        }
+        firstTime = true;
+        properties = new Properties();
+        model = new Model(properties, JSON_PATH);
     }    
 
     @FXML
     private void pressConnect(ActionEvent event)
     {
+        if(isFilled())
+        {
+            properties.setProperty("ServerName", textServerName.getText());
+            properties.setProperty("PortNumber", textPortNumber.getText());
+            properties.setProperty("DbName", textDbName.getText());
+            properties.setProperty("UserName", textUserName.getText());
+            properties.setProperty("Password", textUserPassword.getText());
+        }
+        else
+        {
+            Alert alert = new Alert(AlertType.WARNING, "Database parameters are not set up.\r\nLoad from file?", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+            alert.showAndWait();
+            if(!(alert.getResult() == ButtonType.YES && tryLoadFromPropFile()))
+                return;
+        }
+        if(executor != null && !executor.isShutdown())
+            executor.shutdown();
+        if(!model.hasConnection())
+            errorState(NO_CONNECTION_MSG);
+        else
+            start();
+    }
+    
+    private void setUpTray()
+    {
+        if(SystemTray.isSupported())
+        {
+            try
+            {
+                SystemTray tray = SystemTray.getSystemTray();
+                java.awt.Image img = ImageIO.read(new File(NORMAL_IMAGE_PATH));
+                
+                PopupMenu pm = new PopupMenu();
+                MenuItem itemParams = new MenuItem("Parameters");
+                itemParams.addActionListener((event)->{ Platform.runLater(()->{stage.show();});  });
+                
+                MenuItem itemConnect = new MenuItem("Connect");
+                itemConnect.addActionListener((event)->
+                    { 
+                        if(model.hasConnection()) 
+                            normalState("Sucessfully connected to database");
+                        else
+                            errorState(NO_CONNECTION_MSG);
+                    });
+                
+                MenuItem itemExit = new MenuItem("Exit");
+                itemExit.addActionListener((e)->{ System.exit(0);});
+                
+                pm.add(itemParams);
+                pm.add(itemConnect);
+                pm.add(itemExit);
+                
+                trayIcon = new TrayIcon(img,TRAY_NAME, pm);
+                tray.add(trayIcon);
+                Platform.setImplicitExit(false);
+            } catch (IOException ex)
+            {
+                Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            catch (AWTException ex)
+            {
+                Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }   
+    }
+    
+    public void setUpStage(Stage stage)
+    {
+        this.stage = stage;
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() 
+            {
+                @Override
+                public void handle(WindowEvent t) {
+                    hide(stage);
+                }
+            });
         
+        setUpTray();
+        if(tryLoadFromPropFile())
+        {
+            start();
+            hide(stage);
+        }
+    }
+    
+    public void showProgramIsMinimizedMsg() 
+    {
+        if (firstTime) 
+        {
+            trayIcon.displayMessage("BelReader","Application runs in background",TrayIcon.MessageType.INFO);
+            firstTime = false;
+        }
+    }
+    
+     private void hide(final Stage stage) 
+     {
+        Platform.runLater(new Runnable() 
+        {
+            @Override
+            public void run() {
+                if (SystemTray.isSupported()) {
+                    stage.hide();
+                    showProgramIsMinimizedMsg();
+                } else {
+                    System.exit(0);
+                }
+            }
+        });
     }
     
     private boolean isFilled()
@@ -67,29 +204,62 @@ public class MainViewController implements Initializable
     {
         try
         {
-            Properties prop = new Properties();
-            prop.load(new FileInputStream(PROP_FILE));
-            textServerName.setText(prop.getProperty("ServerName"));
-            textPortNumber.setText(prop.getProperty("PortNumber"));
-            textDbName.setText(prop.getProperty("DbName"));
-            textUserName.setText(prop.getProperty("UserName"));
-            textUserPassword.setText(prop.getProperty("Password"));
-            return isFilled() ? tryConnect() : false;
-        } catch (IOException ex)
+            properties.load(new FileInputStream(PROP_FILE));
+        }  catch (IOException ex)
         {
             Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         }
-        return false;
-    }
-    
-    private boolean tryConnect()
-    {
-        
+        textServerName.setText(properties.getProperty("ServerName"));
+        textPortNumber.setText(properties.getProperty("PortNumber"));
+        textDbName.setText(properties.getProperty("DbName"));
+        textUserName.setText(properties.getProperty("UserName"));
+        textUserPassword.setText(properties.getProperty("Password"));
+        return isFilled() ? model.hasConnection() : false;
     }
     
     private void start()
     {
+        executor = Executors.newScheduledThreadPool(1);
+        executor.scheduleAtFixedRate(()->
+            {
+                if(model.hasConnection())
+                {
+                    if(model.hasNewData())
+                        model.update();
+                }
+                else
+                    errorState(NO_CONNECTION_MSG);
+            }
+                , 1, 2, TimeUnit.SECONDS);
+    }
+    
+    private void errorState(String reason)
+    {
+        try
+        {
+            trayIcon.setImage(ImageIO.read(new File(ERROR_IMAGE_PATH)));
+        } catch (IOException ex)
+        {
+            Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
+        if(!reason.isEmpty())
+            trayIcon.displayMessage("BelReader error", reason, TrayIcon.MessageType.ERROR);
+    }
+    
+    private void normalState(String message)
+    {
+        try
+        {
+            trayIcon.setImage(ImageIO.read(new File(NORMAL_IMAGE_PATH)));
+        } catch (IOException ex)
+        {
+            Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        if(!message.isEmpty())
+            trayIcon.displayMessage("BelReader", message, TrayIcon.MessageType.INFO); 
     }
     
 }

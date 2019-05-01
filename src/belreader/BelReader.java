@@ -5,6 +5,7 @@
  */
 package belreader;
 
+import belreader.gui.controller.MainViewController;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -26,7 +27,10 @@ public class BelReader extends Application
     @Override
     public void start(Stage stage) throws IOException
     {
-        Parent root = FXMLLoader.load(getClass().getResource("/belreader/gui/view/MainView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/belreader/gui/view/MainView.fxml"));
+        Parent root = (Parent)loader.load();
+        MainViewController controller = (MainViewController)loader.getController();
+        controller.setUpStage(stage); 
         
         Scene scene = new Scene(root);
         
