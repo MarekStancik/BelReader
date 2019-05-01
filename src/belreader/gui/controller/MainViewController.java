@@ -15,7 +15,9 @@ import java.awt.TrayIcon;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -130,7 +132,17 @@ public class MainViewController implements Initializable
                     });
                 
                 MenuItem itemExit = new MenuItem("Exit");
-                itemExit.addActionListener((e)->{ System.exit(0);});
+                itemExit.addActionListener((e)->
+                    { 
+                        try
+                        {
+                            properties.store(new FileOutputStream(new File(PROP_FILE)), TRAY_NAME);
+                        } catch (IOException ex)
+                        {
+                            Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        System.exit(0);
+                    });
                 
                 pm.add(itemParams);
                 pm.add(itemConnect);
