@@ -29,12 +29,12 @@ public class BelReader extends Application
     {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/belreader/gui/view/MainView.fxml"));
         Parent root = (Parent)loader.load();
-        MainViewController controller = (MainViewController)loader.getController();
-        controller.setUpStage(stage); 
+        MainViewController controller = (MainViewController)loader.getController(); 
         
         Scene scene = new Scene(root);
         
         stage.setScene(scene);
+        controller.setUpStage(stage);
         stage.show();
     }
 

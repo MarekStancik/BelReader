@@ -19,6 +19,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
@@ -63,6 +65,7 @@ public class MainViewController implements Initializable
     private TrayIcon trayIcon;
     private Stage stage;
     private boolean firstTime;
+    private boolean isError;
     private Properties properties;
     
     private final String PROP_FILE = "src/belreader/resources/connection.properties";
@@ -78,10 +81,16 @@ public class MainViewController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
+
+    }    
+    
+    public MainViewController()
+    {
+        isError = false;
         firstTime = true;
         properties = new Properties();
         model = new Model(properties, JSON_PATH);
-    }    
+    }
 
     @FXML
     private void pressConnect(ActionEvent event)
@@ -208,15 +217,22 @@ public class MainViewController implements Initializable
     
     private boolean isFilled()
     {
-        return !(textServerName.getText().isEmpty() || textPortNumber.getText().isEmpty() || textDbName.getText().isEmpty() 
-                || textUserName.getText().isEmpty() || textUserPassword.getText().isEmpty());
+        TextField tfs[] = {textDbName,textPortNumber,textServerName,textUserName,textUserPassword};
+        for(TextField tf: tfs)
+        {
+            if(tf.getText() == null || tf.getText().isEmpty())
+                return false;
+        }
+        return true;
     }
     
     private boolean tryLoadFromPropFile()
     {
         try
         {
-            properties.load(new FileInputStream(PROP_FILE));
+            File f = new File(PROP_FILE);
+            if(f.exists())
+                properties.load(new FileInputStream(f));
         }  catch (IOException ex)
         {
             Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
@@ -239,11 +255,13 @@ public class MainViewController implements Initializable
                 {
                     if(model.hasNewData())
                         model.update();
+                    if(isError)
+                        normalState("Connection Refreshed");
                 }
                 else
                     errorState(NO_CONNECTION_MSG);
             }
-                , 1, 2, TimeUnit.SECONDS);
+                , 1, 5, TimeUnit.SECONDS);
     }
     
     private void errorState(String reason)
@@ -258,6 +276,7 @@ public class MainViewController implements Initializable
         
         if(!reason.isEmpty())
             trayIcon.displayMessage("BelReader error", reason, TrayIcon.MessageType.ERROR);
+        isError = false;
     }
     
     private void normalState(String message)
@@ -272,6 +291,7 @@ public class MainViewController implements Initializable
         
         if(!message.isEmpty())
             trayIcon.displayMessage("BelReader", message, TrayIcon.MessageType.INFO); 
+        isError = true;
     }
     
 }
