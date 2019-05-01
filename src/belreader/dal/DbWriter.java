@@ -18,6 +18,7 @@ public class DbWriter implements IWriter
     public DbWriter(DbConnectionProvider provider)
     {
         this.provider = provider;
+        //MADS HERE IT IS
     }
     
     @Override
