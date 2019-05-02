@@ -18,6 +18,7 @@ public class Task {
     private Date endDate;
     private Date startDate;
     private boolean finished;
+    private int ID;
 
     public Task(String department, Date endDate, Date startDate, boolean finished) {
         this.department = department;
@@ -57,6 +58,15 @@ public class Task {
     public void setFinished(boolean finished) {
         this.finished = finished;
     }
+
+    public int getID() {
+        return ID;
+    }
+
+    public void setID(int ID) {
+        this.ID = ID;
+    }
+    
 
 
     @Override
