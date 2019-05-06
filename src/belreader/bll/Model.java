@@ -10,14 +10,9 @@ import belreader.dal.DbConnectionProvider;
 import belreader.dal.DbWriter;
 import belreader.dal.IReader;
 import belreader.dal.IWriter;
-import belreader.dal.JSONReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import belreader.dal.JSONFileReader;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -34,35 +29,54 @@ public class Model
     {
         writer = new DbWriter(new DbConnectionProvider(dbProps));
         this.filePath = filePath; 
+        initializeReader();
+    }
+    
+    private void initializeReader()
+    {
+        reader = new JSONFileReader(filePath);
     }
 
     public void update()
     {
-        try
+        lastOrders = reader.getOrders();
+        if(lastOrders != null)
         {
-            InputStream is = new FileInputStream(filePath);
-            reader = new JSONReader(is);
-            lastOrders = reader.getOrders();
-            if(lastOrders != null)
-            {
-                for(Order order: lastOrders)
-                {
-                    writer.setOrder(order);
-                }
-            }
-        } catch (FileNotFoundException ex)
-        {
-            Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+            for(Order order: lastOrders)
+                writer.setOrder(order);
         }
     }
     
     public boolean hasNewData()
     {
-        return true;
+        List<Order> newOrders = reader.getOrders();
+        if(newOrders != null && newOrders.size() > 0)
+        {
+            if(lastOrders != null && lastOrders.size() == newOrders.size())
+            {
+                for (int i = 0; i < lastOrders.size(); i++)
+                    if(!lastOrders.get(i).equals(newOrders.get(i)))
+                        return false;
+            }
+            return true;
+        }
+        else
+            return false;
     }
     
     public boolean hasConnection()
     {
         return writer.hasConnection();
+    }
+    
+    /**
+    * changes path to the JSON file
+    *
+    * @param  newPath  an absolute path to the JSON file
+    */
+    public void changeJsonFilePath(String newPath)
+    {
+        filePath = newPath;
+        initializeReader();
     }
 }

@@ -31,10 +31,8 @@ public class DbWriter implements IWriter
     public void setOrder(Order order)
             /* WRITING ORDER OBJECT INSIDE A DATABASE */
     {
-        try
-        {
-            
-            Connection con = provider.getConnection();                     
+        try(Connection con = provider.getConnection())
+        {                   
             String sql = "INSERT INTO Orders (CustomerName,DeliveryDate,OrderNo,) VALUES (?,?,?)"; 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, order.getCustomerName());
@@ -43,34 +41,25 @@ public class DbWriter implements IWriter
             ps.execute();
             List<Task> tasks = order.getTaskList();
             /*  Now order is written and we need to write also Tasks inside of Order object */
-            for (Task task : tasks) {
+            for (Task task : tasks) 
+            {
                 setTask(task);
                 setRelation(order, task);
-                
             }
-            
-            
-            
         } 
         catch(Exception ex){
             Logger.getLogger(DbWriter.class.getName()).log(Level.SEVERE, null, ex);
-            
         }
     }
     /* Method to creating relation between specific tasks inside an order */
     public void setRelation(Order order, Task task){
-         try
-        {
-            
-            Connection con = provider.getConnection();                     
+        try(Connection con = provider.getConnection())
+        {                  
             String sql = "INSERT INTO OrderTasks (OrderNo,TaskNo) VALUES (?,?)"; 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, order.getOrderNo());
-            ps.setInt(2, task.getID());
+            ps.setInt(2, task.getTaskId());
             ps.execute();
-           
-            
- 
         } 
         catch(Exception ex){
             Logger.getLogger(DbWriter.class.getName()).log(Level.SEVERE, null, ex);
@@ -79,31 +68,33 @@ public class DbWriter implements IWriter
     }
     /* Method and Cyril from writing tasks inside database */
     public void setTask(Task task){
-         try
+        try(Connection con = provider.getConnection())
         {
-            
-            Connection con = provider.getConnection();                     
             String sql = "INSERT INTO Tasks (Department,StartDate,EndDate,Finished) VALUES (?,?,?,?)"; 
             PreparedStatement ps = con.prepareStatement(sql);
-            ps.setString(1, task.getDepartment());
+            ps.setString(1, task.getDepartmentName());
             ps.setDate(2, task.getStartDate());
             ps.setDate(3, task.getEndDate());
             ps.setBoolean(4, task.isFinished());
             ps.execute();
-           
-            
- 
         } 
         catch(Exception ex){
             Logger.getLogger(DbWriter.class.getName()).log(Level.SEVERE, null, ex);
-            
+
         }
     }
 
     @Override
     public boolean hasConnection()
     {
-        return false;//throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try(Connection con = provider.getConnection())
+        {
+            return true;
+        } 
+        catch(Exception ex){
+            Logger.getLogger(DbWriter.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
     }
     
 }

@@ -7,6 +7,7 @@
 package belreader.be;
 
 import java.sql.Date;
+import java.util.Objects;
 
 /**
  *
@@ -14,33 +15,66 @@ import java.sql.Date;
  */
 public class Task {
     
-    private String department;
-    private Date endDate;
+    private int taskId;
     private Date startDate;
+    private Date endDate;
+    private String departmentName;
     private boolean finished;
-    private int ID;
 
-    public Task(String department, Date endDate, Date startDate, boolean finished) {
-        this.department = department;
-        this.endDate = endDate;
+    public Task(int taskId,Date startDate, Date endDate, String departmentName, boolean finished) {
+        this.taskId = taskId;
         this.startDate = startDate;
+        this.endDate = endDate;
+        this.departmentName = departmentName;
         this.finished = finished;
     }
 
-    public String getDepartment() {
-        return department;
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        return hash;
     }
 
-    public void setDepartment(String department) {
-        this.department = department;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Task other = (Task) obj;
+        if (this.taskId != other.taskId) {
+            return false;
+        }
+        if (!Objects.equals(this.startDate, other.startDate)) {
+            return false;
+        }
+        if (!Objects.equals(this.endDate, other.endDate)) {
+            return false;
+        }
+        if (!Objects.equals(this.departmentName, other.departmentName)) {
+            return false;
+        }
+        if (this.finished != other.finished) {
+            return false;
+        }
+        return true;
+    }
+    
+    
+    
+    @Override
+    public String toString() {
+        return "Task{" + "taskId=" + taskId + ", startDate=" + startDate + ", endDate=" + endDate + ", departmentName=" + departmentName + ", finished=" + finished + '}';
+    }
+    
+    public int getTaskId() {
+        return taskId;
     }
 
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
+    public void setTaskId(int taskId) {
+        this.taskId = taskId;
     }
 
     public Date getStartDate() {
@@ -51,6 +85,22 @@ public class Task {
         this.startDate = startDate;
     }
 
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
     public boolean isFinished() {
         return finished;
     }
@@ -58,21 +108,4 @@ public class Task {
     public void setFinished(boolean finished) {
         this.finished = finished;
     }
-
-    public int getID() {
-        return ID;
-    }
-
-    public void setID(int ID) {
-        this.ID = ID;
-    }
-    
-
-
-    @Override
-    public String toString() {
-        return "Task{" + "department=" + department + ", endDate=" + endDate + ", startDate=" + startDate + ", finished=" + finished + '}';
-    }
-    
-    
 }

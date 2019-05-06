@@ -7,7 +7,9 @@
 package belreader.be;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javafx.beans.property.SimpleStringProperty;
 
 /**
@@ -16,31 +18,61 @@ import javafx.beans.property.SimpleStringProperty;
  */
 public class Order {
     
-    private SimpleStringProperty customerName;
-    private Date deliveryDate;
     private String orderNo;
-    private List<Task> taskList;
+    private String customerName;
+    private Date deliveryDate;
+    private List<Task> taskList = new ArrayList();
     
-    public Order(String customerName, Date deliveryDate, String orderNo, List<Task> taskNo) {
-        this.customerName = new SimpleStringProperty(customerName);
-        this.deliveryDate = deliveryDate;
+    public Order(String orderNo, String customerName, Date deliveryDate, List<Task> taskList) {
         this.orderNo = orderNo;
-        this.taskList = taskNo;
-    }
-
-    public String getCustomerName() {
-        return customerName.get();
-    }
-
-    public List<Task> getTaskList() {
-        return taskList;
-    }
-
-    public void setTaskList(List<Task> taskList) {
+        this.customerName = customerName;
+        this.deliveryDate = deliveryDate;
         this.taskList = taskList;
     }
 
-    public void setCustomerName(SimpleStringProperty customerName) {
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Order other = (Order) obj;
+        if (!Objects.equals(this.orderNo, other.orderNo)) {
+            return false;
+        }
+        if (!Objects.equals(this.customerName, other.customerName)) {
+            return false;
+        }
+        if (!Objects.equals(this.deliveryDate, other.deliveryDate)) {
+            return false;
+        }
+        if (!Objects.equals(this.taskList, other.taskList)) {
+            return false;
+        }
+        return true;
+    }
+
+    public String getOrderNo() {
+        return orderNo;
+    }
+
+    public void setOrderNo(String orderNo) {
+        this.orderNo = orderNo;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
         this.customerName = customerName;
     }
 
@@ -52,13 +84,13 @@ public class Order {
         this.deliveryDate = deliveryDate;
     }
 
-    public String getOrderNo() {
-        return orderNo;
+    public List<Task> getTaskList() {
+        return taskList;
     }
 
-    public void setOrderNo(String orderNo) {
-        this.orderNo = orderNo;
-    }
+    public void setTaskList(List<Task> taskList) {
+        this.taskList = taskList;
+    }  
     
     @Override
     public String toString()

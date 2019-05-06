@@ -23,9 +23,19 @@ import org.json.JSONObject;
  */
 public class JSONReader implements IReader
 {
-    InputStream json;
+    private InputStream json;
     
     public JSONReader(InputStream json)
+    {
+        setInputStream(json);
+    }
+    
+    protected JSONReader()
+    {
+        
+    }
+    
+    protected void setInputStream(InputStream json)
     {
         this.json = json;
     }
@@ -75,9 +85,9 @@ public class JSONReader implements IReader
                 String endDate = task.getString("EndDate");
                 String startDate = task.getString("StartDate");
                 boolean isFinished = task.getBoolean("FinishedOrder");
-                taskList.add(new Task(departmentName, parseDate(endDate), parseDate(startDate), isFinished));
+                taskList.add(new Task(0,parseDate(startDate),parseDate(endDate),departmentName,isFinished));
             }
-            orders.add(new Order(customerName,parseDate(deliveryDate),orderNum,taskList));
+            orders.add(new Order(orderNum,customerName,parseDate(deliveryDate),taskList));
         }       
         
         /*for(Order or: orders)
