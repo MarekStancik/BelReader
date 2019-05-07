@@ -33,49 +33,36 @@ public class DbWriter implements IWriter
     {
         try(Connection con = provider.getConnection())
         {                   
-            String sql = "INSERT INTO Orders (CustomerName,DeliveryDate,OrderNo,) VALUES (?,?,?)"; 
+            String sql = "INSERT INTO OrderTable (CustomerName,DeliveryDate,OrderNo,) VALUES (?,?,?)"; 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, order.getCustomerName());
             ps.setDate(2, order.getDeliveryDate());
             ps.setString(3, order.getOrderNo());
-            ps.execute();
-            List<Task> tasks = order.getTaskList();
-            /*  Now order is written and we need to write also Tasks inside of Order object */
-            for (Task task : tasks) 
-            {
-                setTask(task);
-                setRelation(order, task);
+            if(order.getTaskList()!= null){
+                List<Task> tasks = order.getTaskList(); /* Putting task of an order into database aswell */
+                for (Task task : tasks) {
+                    setTask(task,order.getOrderNo());
+                }
             }
-        } 
-        catch(Exception ex){
-            Logger.getLogger(DbWriter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    /* Method to creating relation between specific tasks inside an order */
-    public void setRelation(Order order, Task task){
-        try(Connection con = provider.getConnection())
-        {                  
-            String sql = "INSERT INTO OrderTasks (OrderNo,TaskNo) VALUES (?,?)"; 
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setString(1, order.getOrderNo());
-            ps.setInt(2, task.getTaskId());
             ps.execute();
         } 
         catch(Exception ex){
             Logger.getLogger(DbWriter.class.getName()).log(Level.SEVERE, null, ex);
-            
         }
     }
+    
+   
     /* Method and Cyril from writing tasks inside database */
-    public void setTask(Task task){
+    public void setTask(Task task, String orderNo){
         try(Connection con = provider.getConnection())
         {
-            String sql = "INSERT INTO Tasks (Department,StartDate,EndDate,Finished) VALUES (?,?,?,?)"; 
+            String sql = "INSERT INTO Tasks (DepartmentName, Department,StartDate,EndDate,Finished) VALUES (?,?,?,?,?)"; 
             PreparedStatement ps = con.prepareStatement(sql);
-            ps.setString(1, task.getDepartmentName());
-            ps.setDate(2, task.getStartDate());
-            ps.setDate(3, task.getEndDate());
-            ps.setBoolean(4, task.isFinished());
+            ps.setString(1, orderNo);
+            ps.setString(2, task.getDepartmentName());
+            ps.setDate(3, task.getStartDate());
+            ps.setDate(4, task.getEndDate());
+            ps.setBoolean(5, task.isFinished());
             ps.execute();
         } 
         catch(Exception ex){
