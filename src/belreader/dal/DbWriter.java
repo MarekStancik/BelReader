@@ -33,18 +33,18 @@ public class DbWriter implements IWriter
     {
         try(Connection con = provider.getConnection())
         {                   
-            String sql = "INSERT INTO OrderTable (CustomerName,DeliveryDate,OrderNo,) VALUES (?,?,?)"; 
+            String sql = "INSERT INTO OrderTable (CustomerName,DeliveryDate,OrderNo) VALUES (?,?,?)"; 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, order.getCustomerName());
             ps.setDate(2, order.getDeliveryDate());
             ps.setString(3, order.getOrderNo());
+            ps.execute();
             if(order.getTaskList()!= null){
                 List<Task> tasks = order.getTaskList(); /* Putting task of an order into database aswell */
                 for (Task task : tasks) {
                     setTask(task,order.getOrderNo());
                 }
             }
-            ps.execute();
         } 
         catch(Exception ex){
             Logger.getLogger(DbWriter.class.getName()).log(Level.SEVERE, null, ex);
@@ -56,7 +56,7 @@ public class DbWriter implements IWriter
     public void setTask(Task task, String orderNo){
         try(Connection con = provider.getConnection())
         {
-            String sql = "INSERT INTO Tasks (DepartmentName, Department,StartDate,EndDate,Finished) VALUES (?,?,?,?,?)"; 
+            String sql = "INSERT INTO Task (OrderNo, DepartmentName,StartDate,EndDate,Finished) VALUES (?,?,?,?,?)"; 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, orderNo);
             ps.setString(2, task.getDepartmentName());

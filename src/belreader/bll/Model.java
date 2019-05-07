@@ -14,6 +14,7 @@ import belreader.dal.JSONFileReader;
 import java.util.List;
 import java.util.Properties;
 
+
 /**
  *
  * @author Marek
@@ -25,7 +26,7 @@ public class Model
     private List<Order> lastOrders;
     private String filePath;
     
-    public Model(Properties dbProps,String filePath)
+    public Model(final Properties dbProps,String filePath)
     {
         writer = new DbWriter(new DbConnectionProvider(dbProps));
         this.filePath = filePath; 
@@ -56,12 +57,12 @@ public class Model
             {
                 for (int i = 0; i < lastOrders.size(); i++)
                     if(!lastOrders.get(i).equals(newOrders.get(i)))
-                        return false;
+                        return true;
             }
-            return true;
+            else
+                return true;
         }
-        else
-            return false;
+        return false;
     }
     
     public boolean hasConnection()

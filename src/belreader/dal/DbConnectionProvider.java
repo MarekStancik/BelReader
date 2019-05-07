@@ -19,9 +19,9 @@ import java.util.logging.Logger;
 public class DbConnectionProvider
 {
     private SQLServerDataSource ds;
-    private Properties props;
+    final private Properties props;
     
-    public DbConnectionProvider(Properties prop)
+    public DbConnectionProvider(final Properties prop)
     {
         props = prop;
         ds = new SQLServerDataSource();
@@ -29,14 +29,12 @@ public class DbConnectionProvider
     
     public Connection getConnection()
     {
-        try
-        {
+        try{
             ds.setServerName(props.getProperty("ServerName"));
             int pnum = 0;
             try{
                 pnum = Integer.parseInt(props.getProperty("PortNumber"));
-            }catch(NumberFormatException ex)
-            {
+            }catch(NumberFormatException ex){
                 pnum = 0;
             }
             ds.setPortNumber(pnum);
@@ -44,8 +42,7 @@ public class DbConnectionProvider
             ds.setUser(props.getProperty("UserName"));
             ds.setPassword(props.getProperty("Password"));
             return ds.getConnection();
-        } catch (SQLServerException ex)
-        {
+        } catch (SQLServerException ex){
             Logger.getLogger(DbConnectionProvider.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }

@@ -96,6 +96,7 @@ public class MainViewController implements Initializable
     @FXML
     private void pressConnect(ActionEvent event)
     {
+        stop();
         if(isFilled())
         {
             properties.setProperty("ServerName", textServerName.getText());
@@ -111,12 +112,40 @@ public class MainViewController implements Initializable
             if(!(alert.getResult() == ButtonType.YES && tryLoadFromPropFile()))
                 return;
         }
+        connect();
+    }
+    
+    private void connect()
+    {
+        stop(); 
+        if(model.hasConnection())
+         {
+             normalState("Sucessfully connected to database");
+             start();
+         }
+         else
+         {
+            isError = false;  //To actually show the error message - this one is called on user input so we want the message to be shown all time/unlike on thread
+            errorState(NO_CONNECTION_MSG); 
+         }
+    }
+    
+    private void exit()
+    {
+        stop(); 
+        try{
+             properties.store(new FileOutputStream(new File(PROP_FILE)), TRAY_NAME);
+         }catch (IOException ex){
+             Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
+         }
+
+         System.exit(0); 
+    }
+    
+    private void stop()
+    {
         if(executor != null && !executor.isShutdown())
             executor.shutdown();
-        if(!model.hasConnection())
-            errorState(NO_CONNECTION_MSG);
-        else
-            start();
     }
     
     private void setUpTray()
@@ -133,26 +162,10 @@ public class MainViewController implements Initializable
                 itemParams.addActionListener((event)->{ Platform.runLater(()->{stage.show();});  });
                 
                 MenuItem itemConnect = new MenuItem("Connect");
-                itemConnect.addActionListener((event)->
-                    { 
-                        if(model.hasConnection()) 
-                            normalState("Sucessfully connected to database");
-                        else
-                            errorState(NO_CONNECTION_MSG);
-                    });
+                itemConnect.addActionListener((event)->{ connect();});
                 
                 MenuItem itemExit = new MenuItem("Exit");
-                itemExit.addActionListener((e)->
-                    { 
-                        try
-                        {
-                            properties.store(new FileOutputStream(new File(PROP_FILE)), TRAY_NAME);
-                        } catch (IOException ex)
-                        {
-                            Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                        System.exit(0);
-                    });
+                itemExit.addActionListener((e)->{exit();});
                 
                 pm.add(itemParams);
                 pm.add(itemConnect);
@@ -249,6 +262,7 @@ public class MainViewController implements Initializable
     
     private void start()
     {
+        stop();
         executor = Executors.newScheduledThreadPool(1);
         executor.scheduleAtFixedRate(()->
             {
@@ -267,32 +281,32 @@ public class MainViewController implements Initializable
     
     private void errorState(String reason)
     {
-        try
+        if(!isError)
         {
-            trayIcon.setImage(ImageIO.read(new File(ERROR_IMAGE_PATH)));
-        } catch (IOException ex)
-        {
-            Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        if(!reason.isEmpty())
-            trayIcon.displayMessage("BelReader error", reason, TrayIcon.MessageType.ERROR);
-        isError = false;
+            try{
+                trayIcon.setImage(ImageIO.read(new File(ERROR_IMAGE_PATH)));
+            } catch (IOException ex){
+                Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            if(!reason.isEmpty())
+                trayIcon.displayMessage("BelReader error", reason, TrayIcon.MessageType.ERROR);
+        }   
+        isError = true;
     }
     
     private void normalState(String message)
     {
-        try
-        {
+        try{
             trayIcon.setImage(ImageIO.read(new File(NORMAL_IMAGE_PATH)));
-        } catch (IOException ex)
-        {
+        } catch (IOException ex){
             Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         if(!message.isEmpty())
-            trayIcon.displayMessage("BelReader", message, TrayIcon.MessageType.INFO); 
-        isError = true;
+            trayIcon.displayMessage("BelReader", message, TrayIcon.MessageType.INFO);
+        
+        isError = false;
     }
     
 }
