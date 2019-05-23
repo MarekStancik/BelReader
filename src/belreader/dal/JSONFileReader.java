@@ -10,6 +10,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,20 +33,32 @@ public class JSONFileReader extends JSONReader
     @Override
     public List<Order> getOrders()
     {
-        
-        try(InputStream is = new FileInputStream(filePath))
+        if(Files.exists(Paths.get(filePath)))
         {
-            setInputStream(is);
-            return super.getOrders(); //To change body of generated methods, choose Tools | Templates.
-        } catch (FileNotFoundException ex)
+            try(InputStream is = new FileInputStream(filePath)){
+                setInputStream(is);
+                return super.getOrders(); //To change body of generated methods, choose Tools | Templates.
+            } catch (IOException ex){
+                Logger.getLogger(JSONFileReader.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void removeSource()
+    {
+        Path fileToRemove = Paths.get(filePath);
+        try
         {
-            Logger.getLogger(JSONFileReader.class.getName()).log(Level.SEVERE, null, ex);
+            Files.deleteIfExists(fileToRemove);
         } catch (IOException ex)
         {
             Logger.getLogger(JSONFileReader.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return null;
     }
+    
+    
     
     
     

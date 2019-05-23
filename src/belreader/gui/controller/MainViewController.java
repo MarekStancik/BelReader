@@ -119,15 +119,15 @@ public class MainViewController implements Initializable
     {
         stop(); 
         if(model.hasConnection())
-         {
-             normalState("Sucessfully connected to database");
-             start();
-         }
-         else
-         {
-            isError = false;  //To actually show the error message - this one is called on user input so we want the message to be shown all time/unlike on thread
-            errorState(NO_CONNECTION_MSG); 
-         }
+        {
+            normalState("Sucessfully connected to database");
+            start();
+        }
+        else
+        {
+           isError = false;  //To actually show the error message - this one is called on user input so we want the message to be shown all time/unlike on thread
+           errorState(NO_CONNECTION_MSG); 
+        }
     }
     
     private void exit()
@@ -257,7 +257,7 @@ public class MainViewController implements Initializable
         textDbName.setText(properties.getProperty("DbName"));
         textUserName.setText(properties.getProperty("UserName"));
         textUserPassword.setText(properties.getProperty("Password"));
-        return isFilled() ? model.hasConnection() : false;
+        return isFilled();
     }
     
     private void start()

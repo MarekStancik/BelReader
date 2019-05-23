@@ -21,7 +21,7 @@ import org.json.JSONObject;
  *
  * @author Marek
  */
-public class JSONReader implements IReader
+public abstract class JSONReader implements IReader
 {
     private InputStream json;
     
@@ -96,7 +96,7 @@ public class JSONReader implements IReader
         return orders;
     }
     
-    public Date parseDate(String str)
+    private static Date parseDate(String str)
     {
         String epochStr = "";
         for (int i = 0; i < str.length(); i++)
@@ -108,6 +108,5 @@ public class JSONReader implements IReader
         long epoch = Long.parseLong(epochStr);
         Date date = new Date(epoch*1000);
         return date;
-    }
-    
+    }   
 }

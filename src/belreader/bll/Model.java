@@ -44,7 +44,12 @@ public class Model
         if(lastOrders != null)
         {
             for(Order order: lastOrders)
-                writer.setOrder(order);
+            {
+                if(!writer.setOrder(order)) //If write is not successful than return from function
+                    return;
+            }
+            /***********If it gets here, it means that all writes were sucesfull, so we can safely delete JSON source file*****************/
+            reader.removeSource();
         }
     }
     
