@@ -53,8 +53,8 @@ public class DbWriter implements IWriter
             ps.setString(i++, order.getCustomerName());
             ps.setDate(i++, order.getDeliveryDate());
             ps.setString(i++, order.getOrderNo());
-            ps.execute();
-            if(order.getTaskList()!= null){
+            int count = ps.executeUpdate();
+            if(count > 0 && order.getTaskList()!= null){
                 List<Task> tasks = order.getTaskList(); /* Putting task of an order into database aswell */
                 for (Task task : tasks) {
                     if(!setTask(task,order.getOrderNo(),con)) //If setting task was not succesfull, we can safely return false since tha change has not been commited
