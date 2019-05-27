@@ -21,7 +21,7 @@ import org.json.JSONObject;
  *
  * @author Marek
  */
-public abstract class JSONReader implements IReader
+public class JSONReader implements IReader
 {
     private InputStream json;
     
@@ -50,8 +50,14 @@ public abstract class JSONReader implements IReader
     public List<Order> getOrders()
     {
         JSONTokener tokener = new JSONTokener(json);
+        if(tokener == null)
+            return null;
         JSONObject obj = new JSONObject(tokener);
+        if(obj == null)
+            return null;
         JSONArray arr = obj.getJSONArray("AvailableWorkers");
+        if(arr == null)
+            return null;
         Iterator itWorkers = arr.iterator(); 
           
         List<Worker> workers = new ArrayList<Worker>();
@@ -67,6 +73,8 @@ public abstract class JSONReader implements IReader
         
         List<Order> orders = new ArrayList<>();
         arr = obj.getJSONArray("ProductionOrders");
+        if(arr == null) 
+                return null;
         Iterator itOrders = arr.iterator();
         
         while(itOrders.hasNext())
@@ -109,4 +117,10 @@ public abstract class JSONReader implements IReader
         Date date = new Date(epoch*1000);
         return date;
     }   
+
+    @Override
+    public void removeSource()
+    {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

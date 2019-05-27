@@ -75,6 +75,8 @@ public class MainViewController implements Initializable
     private final String NORMAL_IMAGE_PATH = "src/belreader/resources/belmanBlue.jpg";
     private final String JSON_PATH = "src/belreader/resources/json.txt";
     private final String NO_CONNECTION_MSG = "Cannot connect to the database";
+    @FXML
+    private TextField textFilePath;
 
     /**
      * Initializes the controller class.
@@ -82,7 +84,7 @@ public class MainViewController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-
+        
     }    
     
     public MainViewController()
@@ -90,7 +92,7 @@ public class MainViewController implements Initializable
         isError = false;
         firstTime = true;
         properties = new Properties();
-        model = new Model(properties, JSON_PATH);
+        model = new Model(properties, JSON_PATH); 
     }
 
     @FXML
@@ -104,6 +106,7 @@ public class MainViewController implements Initializable
             properties.setProperty("DbName", textDbName.getText());
             properties.setProperty("UserName", textUserName.getText());
             properties.setProperty("Password", textUserPassword.getText());
+            properties.setProperty("FilePath", textFilePath.getText());
         }
         else
         {
@@ -117,7 +120,7 @@ public class MainViewController implements Initializable
     
     private void connect()
     {
-        stop(); 
+        stop();
         if(model.hasConnection())
         {
             normalState("Sucessfully connected to database");
@@ -231,7 +234,7 @@ public class MainViewController implements Initializable
     
     private boolean isFilled()
     {
-        TextField tfs[] = {textDbName,textPortNumber,textServerName,textUserName,textUserPassword};
+        TextField tfs[] = {textDbName,textPortNumber,textServerName,textUserName,textUserPassword,textFilePath};
         for(TextField tf: tfs)
         {
             if(tf.getText() == null || tf.getText().isEmpty())
@@ -257,12 +260,14 @@ public class MainViewController implements Initializable
         textDbName.setText(properties.getProperty("DbName"));
         textUserName.setText(properties.getProperty("UserName"));
         textUserPassword.setText(properties.getProperty("Password"));
+        textFilePath.setText(properties.getProperty("FilePath"));
         return isFilled();
     }
     
     private void start()
     {
         stop();
+        model.changeJsonFilePath(textFilePath.getText());
         executor = Executors.newScheduledThreadPool(1);
         executor.scheduleAtFixedRate(()->
             {

@@ -49,7 +49,7 @@ public class Model
                     return;
             }
             /***********If it gets here, it means that all writes were sucesfull, so we can safely delete JSON source file*****************/
-            reader.removeSource();
+            //reader.removeSource(); //on the other hand, I am not sure if we want to remove it 
         }
     }
     
