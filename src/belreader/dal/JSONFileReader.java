@@ -23,9 +23,9 @@ import java.util.logging.Logger;
  */
 public class JSONFileReader extends JSONReader
 {
-    private String filePath;
+    private final String filePath;
     
-    public JSONFileReader(String filePath)
+    public JSONFileReader(final String filePath)
     {    
         this.filePath = filePath;
     }
@@ -43,23 +43,6 @@ public class JSONFileReader extends JSONReader
             }
         }
         return null;
-    }
-
-    @Override
-    public void removeSource()
-    {
-        Path fileToRemove = Paths.get(filePath);
-        try
-        {
-            Files.deleteIfExists(fileToRemove);
-        } catch (IOException ex)
-        {
-            Logger.getLogger(JSONFileReader.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    
-    
-    
+    }   
     
 }

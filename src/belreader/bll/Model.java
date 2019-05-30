@@ -24,16 +24,14 @@ public class Model
     private IWriter writer;
     private IReader reader;
     private List<Order> lastOrders;
-    private String filePath;
     
-    public Model(final Properties dbProps,String filePath)
+    public Model(final Properties dbProps,final String filePath)
     {
         writer = new DbWriter(new DbConnectionProvider(dbProps));
-        this.filePath = filePath; 
-        initializeReader();
+        initializeReader(filePath);
     }
     
-    private void initializeReader()
+    private void initializeReader(final String filePath)
     {
         reader = new JSONFileReader(filePath);
     }
@@ -48,8 +46,6 @@ public class Model
                 if(!writer.setOrder(order)) //If write is not successful than return from function
                     return;
             }
-            /***********If it gets here, it means that all writes were sucesfull, so we can safely delete JSON source file*****************/
-            //reader.removeSource(); //on the other hand, I am not sure if we want to remove it 
         }
     }
     
@@ -82,7 +78,6 @@ public class Model
     */
     public void changeJsonFilePath(String newPath)
     {
-        filePath = newPath;
-        initializeReader();
+        initializeReader(newPath);
     }
 }

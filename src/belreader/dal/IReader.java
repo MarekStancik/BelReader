@@ -15,5 +15,4 @@ import belreader.be.Order;
 public interface IReader
 {
     List<Order> getOrders();
-    void removeSource();
 }

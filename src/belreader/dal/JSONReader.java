@@ -55,7 +55,7 @@ public class JSONReader implements IReader
         JSONObject obj = new JSONObject(tokener);
         if(obj == null)
             return null;
-        JSONArray arr = obj.getJSONArray("AvailableWorkers");
+       /* JSONArray arr = obj.getJSONArray("AvailableWorkers");
         if(arr == null)
             return null;
         Iterator itWorkers = arr.iterator(); 
@@ -72,7 +72,7 @@ public class JSONReader implements IReader
         }*/ //FOR TESTING
         
         List<Order> orders = new ArrayList<>();
-        arr = obj.getJSONArray("ProductionOrders");
+        JSONArray arr = obj.getJSONArray("ProductionOrders");
         if(arr == null) 
                 return null;
         Iterator itOrders = arr.iterator();
@@ -93,9 +93,9 @@ public class JSONReader implements IReader
                 String endDate = task.getString("EndDate");
                 String startDate = task.getString("StartDate");
                 boolean isFinished = task.getBoolean("FinishedOrder");
-                taskList.add(new Task(0,parseDate(startDate),parseDate(endDate),departmentName,isFinished));
+                taskList.add(new Task(epochDateToDate(startDate),epochDateToDate(endDate),departmentName,isFinished));
             }
-            orders.add(new Order(orderNum,customerName,parseDate(deliveryDate),taskList));
+            orders.add(new Order(orderNum,customerName,epochDateToDate(deliveryDate),taskList));
         }       
         
         /*for(Order or: orders)
@@ -104,7 +104,7 @@ public class JSONReader implements IReader
         return orders;
     }
     
-    private static Date parseDate(String str)
+    public static Date epochDateToDate(String str)
     {
         String epochStr = "";
         for (int i = 0; i < str.length(); i++)
@@ -117,10 +117,4 @@ public class JSONReader implements IReader
         Date date = new Date(epoch*1000);
         return date;
     }   
-
-    @Override
-    public void removeSource()
-    {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

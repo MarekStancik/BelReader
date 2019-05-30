@@ -15,14 +15,12 @@ import java.util.Objects;
  */
 public class Task {
     
-    private int taskId;
     private Date startDate;
     private Date endDate;
     private String departmentName;
     private boolean finished;
 
-    public Task(int taskId,Date startDate, Date endDate, String departmentName, boolean finished) {
-        this.taskId = taskId;
+    public Task(Date startDate, Date endDate, String departmentName, boolean finished) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.departmentName = departmentName;
@@ -44,9 +42,6 @@ public class Task {
             return false;
         }
         final Task other = (Task) obj;
-        if (this.taskId != other.taskId) {
-            return false;
-        }
         if (!Objects.equals(this.startDate, other.startDate)) {
             return false;
         }
@@ -66,17 +61,9 @@ public class Task {
     
     @Override
     public String toString() {
-        return "Task{" + "taskId=" + taskId + ", startDate=" + startDate + ", endDate=" + endDate + ", departmentName=" + departmentName + ", finished=" + finished + '}';
+        return "Task{" + "startDate=" + startDate + ", endDate=" + endDate + ", departmentName=" + departmentName + ", finished=" + finished + '}';
     }
     
-    public int getTaskId() {
-        return taskId;
-    }
-
-    public void setTaskId(int taskId) {
-        this.taskId = taskId;
-    }
-
     public Date getStartDate() {
         return startDate;
     }
