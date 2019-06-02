@@ -1,0 +1,15 @@
+       /* JSONArray arr = obj.getJSONArray("AvailableWorkers");
+        if(arr == null)
+            return null;
+        Iterator itWorkers = arr.iterator(); 
+          
+        List<Worker> workers = new ArrayList<Worker>();
+        while (itWorkers.hasNext())  
+        { 
+            JSONObject worker = (JSONObject) itWorkers.next();
+            workers.add(new Worker(worker.getString("__type"),worker.getString("Name"),worker.getString("Initials"),worker.getInt("SalaryNumber")));
+        } 
+      /*  for(Worker wk: workers)
+        {
+            System.out.println(wk.toString());
+        }*/ //FOR TESTING

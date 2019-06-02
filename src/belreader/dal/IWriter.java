@@ -12,6 +12,16 @@ import belreader.be.Order;
  */
 public interface IWriter
 {
+    /**
+     * 
+     * @param Order to be stored
+     * @return true if writing has been sucessfull
+     */
     boolean setOrder(Order order);
+    
+    /**
+     * Checks if writer has connection to its storage
+     * @return true if it has connection
+     */
     boolean hasConnection();
 }

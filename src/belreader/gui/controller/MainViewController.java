@@ -60,23 +60,47 @@ public class MainViewController implements Initializable
     private TextField textUserName;
     @FXML
     private TextField textUserPassword;
-    
-    private ScheduledExecutorService executor;
-    private Model model;
-    private TrayIcon trayIcon;
-    private Stage stage;
-    private boolean firstTime;
-    private boolean isError;
-    private Properties properties;
-    
-    private final String PROP_FILE = "src/belreader/resources/connection.properties";
-    private final String TRAY_NAME = "BelReader";
-    private final String ERROR_IMAGE_PATH = "src/belreader/resources/belmanRed.jpg";
-    private final String NORMAL_IMAGE_PATH = "src/belreader/resources/belmanBlue.jpg";
-    private final String JSON_PATH = "src/belreader/resources/json.txt";
-    private final String NO_CONNECTION_MSG = "Cannot connect to the database";
     @FXML
     private TextField textFilePath;
+    
+    //executor that takes care of dynamicall checking of new JSON data and than updating the database
+    private ScheduledExecutorService executor;
+    
+    //Business model for the application
+    private Model model;
+    
+    //Instance of trayIcon(the small Icon in system Tray)
+    private TrayIcon trayIcon;
+    
+    //Parent stage
+    private Stage stage;
+    
+    //States whether the program is minimized for firstTime - if it is than it will show message that it runs in background
+    private boolean firstTime;
+    
+    //States whether the program is in the error or normal state
+    private boolean isError;
+    
+    //Reference to properties that are used to set up the application
+    private Properties properties;
+    
+    //Path to properties file
+    private final String PROP_FILE = "src/belreader/resources/connection.properties";
+    
+    //The string that will be shown as a hint text when mouseover the trayIcon
+    private final String TRAY_NAME = "BelReader";
+    
+    //Path to image which will be used in trayIcon in case an error would occur
+    private final String ERROR_IMAGE_PATH = "src/belreader/resources/belmanRed.jpg";
+    
+    //Path to image which will be used in trayIcon while application is in working state
+    private final String NORMAL_IMAGE_PATH = "src/belreader/resources/belmanBlue.jpg";
+    
+    //Default path to JSON file
+    private final String JSON_PATH = "src/belreader/resources/json.txt";
+    
+    //Message that will show up in balloon hint when there will be no connection to database
+    private final String NO_CONNECTION_MSG = "Cannot connect to the database";
 
     /**
      * Initializes the controller class.
@@ -95,11 +119,12 @@ public class MainViewController implements Initializable
         model = new Model(properties, JSON_PATH); 
     }
 
+    /***********Event that will be fired when user press Connect button*****************/
     @FXML
     private void pressConnect(ActionEvent event)
     {
-        stop();
-        if(isFilled())
+        stop(); //Stops the executor in case it would already run
+        if(isFilled()) //Checks if the textFields are filled, If they are, than the properties instance will be set accordingly to the textFields
         {
             properties.setProperty("ServerName", textServerName.getText());
             properties.setProperty("PortNumber", textPortNumber.getText());
@@ -108,7 +133,7 @@ public class MainViewController implements Initializable
             properties.setProperty("Password", textUserPassword.getText());
             properties.setProperty("FilePath", textFilePath.getText());
         }
-        else
+        else //If text fields are not filled than Message will show up
         {
             Alert alert = new Alert(AlertType.WARNING, "Database parameters are not set up.\r\nLoad from file?", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
             alert.showAndWait();
@@ -118,13 +143,14 @@ public class MainViewController implements Initializable
         connect();
     }
     
+    /*****************Method used to connect to the database*********************/
     private void connect()
     {
-        stop();
-        if(model.hasConnection())
+        stop(); //Stops the executor in case it would already run
+        if(model.hasConnection()) //Try connect to the database
         {
             normalState("Sucessfully connected to database");
-            start();
+            start(); //Starts the executor again
         }
         else
         {
@@ -133,64 +159,82 @@ public class MainViewController implements Initializable
         }
     }
     
+    /*****************Method used to correctly quit the application*************/
     private void exit()
     {
-        stop(); 
+        stop(); //Stops the executor 
         try{
-             properties.store(new FileOutputStream(new File(PROP_FILE)), TRAY_NAME);
+             properties.store(new FileOutputStream(new File(PROP_FILE)), TRAY_NAME); //Stores the properties to file
          }catch (IOException ex){
              Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
          }
 
-         System.exit(0); 
+         System.exit(0);  //Exits the application
     }
     
+    /*********************STOPS the execuotr*******************/
     private void stop()
     {
         if(executor != null && !executor.isShutdown())
             executor.shutdown();
     }
     
+    /*******************Sets up the TRAY icon-Should be used only once at start************/
     private void setUpTray()
     {
-        if(SystemTray.isSupported())
+        if(SystemTray.isSupported()) //Checks if tray Icon is supported on this platfrorm
         {
             try
             {
-                SystemTray tray = SystemTray.getSystemTray();
-                java.awt.Image img = ImageIO.read(new File(NORMAL_IMAGE_PATH));
+                SystemTray tray = SystemTray.getSystemTray(); //Recieves the systemtray 
+                java.awt.Image img = ImageIO.read(new File(NORMAL_IMAGE_PATH)); //Sets up the image for the icon
                 
+                //Setting up PopupMenu for trayIcon
                 PopupMenu pm = new PopupMenu();
+                
+                //Creating "Parameters" item
                 MenuItem itemParams = new MenuItem("Parameters");
                 itemParams.addActionListener((event)->{ Platform.runLater(()->{stage.show();});  });
                 
+                //Creating "Connect" item
                 MenuItem itemConnect = new MenuItem("Connect");
                 itemConnect.addActionListener((event)->{ connect();});
                 
+                //Creating "Exit" item
                 MenuItem itemExit = new MenuItem("Exit");
                 itemExit.addActionListener((e)->{exit();});
                 
+                //Adding the items to the popup menu
                 pm.add(itemParams);
                 pm.add(itemConnect);
                 pm.add(itemExit);
                 
+                //Creates the trayIcon with loaded image and created PopupMenu, than adds it into system Tray
                 trayIcon = new TrayIcon(img,TRAY_NAME, pm);
                 tray.add(trayIcon);
-                Platform.setImplicitExit(false);
-            } catch (IOException ex)
+                Platform.setImplicitExit(false); //So the application would not close on "close" icon in the application bar
+            } catch (Exception ex)
             {
                 Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
+                Alert alert = new Alert(AlertType.ERROR, "Error occured while seting up application enviroment", ButtonType.OK);
+                alert.showAndWait();
+                System.exit(0);
             }
-            catch (AWTException ex)
-            {
-                Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }   
+        }  
+        else
+        {
+            Alert alert = new Alert(AlertType.ERROR, "Application is not supported on this machine", ButtonType.OK);
+            alert.showAndWait();
+            System.exit(0);
+        }
     }
     
+    //**************Method to setUp the whole stage- should be called just once at start**************/
     public void setUpStage(Stage stage)
     {
         this.stage = stage;
+        
+        //Setting application so it will minimize in case of pressing quit icon
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() 
             {
                 @Override
@@ -199,7 +243,10 @@ public class MainViewController implements Initializable
                 }
             });
         
+        //Sets up the trayIcon
         setUpTray();
+        
+        //Try to load properties from file, if they are loaded than It will just start functioning and minimize
         if(tryLoadFromPropFile())
         {
             start();
@@ -216,8 +263,12 @@ public class MainViewController implements Initializable
         }
     }
     
-     private void hide(final Stage stage) 
-     {
+    /**
+     * Hides the stage correctly, if tray is not supported the application will just close
+     * @param stage stage to hide 
+     */
+    private void hide(final Stage stage) 
+    {
         Platform.runLater(new Runnable() 
         {
             @Override
@@ -232,6 +283,10 @@ public class MainViewController implements Initializable
         });
     }
     
+    /**
+     * 
+     * @return true if all of the textFields are filled else false
+     */
     private boolean isFilled()
     {
         TextField tfs[] = {textDbName,textPortNumber,textServerName,textUserName,textUserPassword,textFilePath};
@@ -243,6 +298,10 @@ public class MainViewController implements Initializable
         return true;
     }
     
+    /**
+     * 
+     * @return True if all of the params for database are loaded from the file, otherwise returns false
+     */
     private boolean tryLoadFromPropFile()
     {
         try
@@ -264,11 +323,14 @@ public class MainViewController implements Initializable
         return isFilled();
     }
     
+    /**
+     * Starts the executor that periodically checks for new data every 5 seconds
+     */
     private void start()
     {
-        stop();
-        model.changeJsonFilePath(textFilePath.getText());
-        executor = Executors.newScheduledThreadPool(1);
+        stop(); //Stops the executor in case it was already running
+        model.changeJsonFilePath(textFilePath.getText()); //Setts the most current file path
+        executor = Executors.newScheduledThreadPool(1); //Creates new executor -- Old one is stopped by now and will be taken care of by GarbageCollector
         executor.scheduleAtFixedRate(()->
             {
                 if(model.hasConnection())
@@ -284,26 +346,34 @@ public class MainViewController implements Initializable
                 , 1, 5, TimeUnit.SECONDS);
     }
     
+    /**
+     * Puts application in error state and shows message that is provided as parameter
+     * @param reason Message to be show in error state 
+     */
     private void errorState(String reason)
     {
         if(!isError)
         {
             try{
-                trayIcon.setImage(ImageIO.read(new File(ERROR_IMAGE_PATH)));
+                trayIcon.setImage(ImageIO.read(new File(ERROR_IMAGE_PATH))); //Sets up the error image for tray icon
             } catch (IOException ex){
                 Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             if(!reason.isEmpty())
-                trayIcon.displayMessage("BelReader error", reason, TrayIcon.MessageType.ERROR);
+                trayIcon.displayMessage("BelReader error", reason, TrayIcon.MessageType.ERROR); //Shows the balloon hint
         }   
         isError = true;
     }
     
+    /**
+     * Puts the application back to normal state
+     * @param message The message to be shown when application is put to normal state
+     */
     private void normalState(String message)
     {
         try{
-            trayIcon.setImage(ImageIO.read(new File(NORMAL_IMAGE_PATH)));
+            trayIcon.setImage(ImageIO.read(new File(NORMAL_IMAGE_PATH))); //Sets up the "normal" image for tray icon
         } catch (IOException ex){
             Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -25,11 +25,19 @@ public class JSONFileReader extends JSONReader
 {
     private final String filePath;
     
+    /**
+     * Creates instance and initialize the data stream from provided filepath
+     * @param filePath Path to the json file
+     */
     public JSONFileReader(final String filePath)
     {    
         this.filePath = filePath;
     }
-
+    
+    /**
+     * Loads the orders from provided file
+     * @return list of orders loaded from file 
+     */
     @Override
     public List<Order> getOrders()
     {

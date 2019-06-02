@@ -36,6 +36,9 @@ public class Model
         reader = new JSONFileReader(filePath);
     }
 
+    /**
+     * Updates the writer with the new data from reader
+     */
     public void update()
     {
         lastOrders = reader.getOrders();
@@ -49,6 +52,10 @@ public class Model
         }
     }
     
+    /**
+     * Checks if the data loaded from reader are newer than the one that was already written
+     * @return true if has new data
+     */
     public boolean hasNewData()
     {
         List<Order> newOrders = reader.getOrders();
@@ -66,6 +73,10 @@ public class Model
         return false;
     }
     
+    /**
+     * Indicate whether the model has connection to needed sources
+     * @return true if connection is enstabilished 
+     */
     public boolean hasConnection()
     {
         return writer.hasConnection();

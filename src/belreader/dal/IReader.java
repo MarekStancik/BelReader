@@ -14,5 +14,9 @@ import belreader.be.Order;
  */
 public interface IReader
 {
+    /**
+     * Loads orders from Storage
+     * @return List of orders
+     */
     List<Order> getOrders();
 }
